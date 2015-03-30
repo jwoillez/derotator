@@ -1,0 +1,6 @@
+# Eclipse IDE
+.project
+.pydevproject
+
+# Python
+__pycache__
