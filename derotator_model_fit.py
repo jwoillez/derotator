@@ -30,10 +30,8 @@ for filename in filenames:
     params['int_y'] = 0.0
     params['beam_x'] = 0.0
     params['beam_y'] = 0.0
-    params['sign'] = +1.0
-    params0 = params.copy()
-    dpfit.fix(params0, 'sign')
-    params_fit = dpfit.leastsq(derotator.residuals, params0, [data])
+    params['@sign'] = +1.0
+    params_fit = dpfit.leastsq(derotator.residuals, params, [data])
 
     # Save fit
     der_x.append(params_fit['der_x'])
