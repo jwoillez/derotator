@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from argparse import ArgumentParser
 import glob
 import re
 import numpy as np
@@ -77,6 +78,19 @@ def measure_derotator(input_root, plot=True):
 
 
 if __name__ == '__main__':
-    input_pattern = "./DerotB_0_???.fits"
-    measure_derotator(input_pattern, plot=True)
+    description = \
+        """
+        Measures centroids from a set of fits files with format 'root_<angle>.fits',
+        where <angle> is the derotator angle of each fits file,
+        and 'root' is the specified root file.
+
+        The results are stored in an astropy table named 'root.txt'.
+        """
+    parser = ArgumentParser(description=description)
+    parser.add_argument("-p", "--plot",
+                        action="store_true", dest="plot", default=False,
+                        help="plot centroiding diagnostics")
+    parser.add_argument("root", help="root name of the files to process")
+    args = parser.parse_args()
+    measure_derotator(args.root, plot=args.plot)
     plt.show()
