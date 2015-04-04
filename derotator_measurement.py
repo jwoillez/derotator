@@ -47,30 +47,33 @@ def measure_centroid(filename, ax=None):
     return barycenter
 
 
-def measure_derotator(input_pattern, plot=True):
-    output_file = input_pattern.replace("_???.fits",".txt")
-    filenames = glob.glob(input_pattern)
-    if plot:
-        fig, axarr = plt.subplots(1,len(filenames), figsize=(2*len(filenames),3))
-        fig.suptitle(input_pattern)
-    angles = []
-    xs = []
-    ys = []
-    for i, filename in enumerate(filenames):
-        angle = float(re.search("_([0-9][0-9][0-9]).fits", filename).group(1))
-        barycenter = measure_centroid(filename, ax=(axarr[i] if plot else None))
-        if plot:
-            axarr[i].set_title("{0} deg".format(angle))
-        angles.append(angle)
-        xs.append(barycenter[0])
-        ys.append(barycenter[1])
+def measure_derotator(input_root, plot=True):
+    # Identify the files to process, extract te rotator angle, store in a table
+    filenames = [filename for filename in glob.glob(input_root+"_*.fits") if re.match(input_root+"_[0-9]+.fits", filename)]
+    angles = [float(re.search("_([0-9]+).fits", filename).group(1)) for filename in filenames]
     table = Table()
     table['angle'] = angles
-    table['x'] = xs
-    table['y'] = ys
-    print("Saving {0}...".format(output_file))
-    print(table)
+    table['x'] = np.zeros(len(angles), dtype=np.float)
+    table['y'] = np.zeros(len(angles), dtype=np.float)
+    table['filename'] = filenames
+    table.sort('angle')
+    # Prepare plot if needed
+    if plot:
+        fig, axarr = plt.subplots(1,len(filenames), figsize=(2*len(filenames),3))
+        fig.suptitle(input_root)
+    # Measure centroids of identified fits files
+    for i in range(len(table)):
+        barycenter = measure_centroid(table['filename'][i], ax=(axarr[i] if plot else None))
+        if plot:
+            axarr[i].set_title("{0} deg".format(table['angle'][i]))
+        angles.append(table['angle'][i])
+        table['x'][i] = barycenter[0]
+        table['y'][i] = barycenter[1]
+    # Save result
+    output_file = input_root+".txt"
     table.write(output_file, format="ascii.fixed_width_two_line")
+    print("Saved {0}...".format(output_file))
+    print(table)
 
 
 if __name__ == '__main__':
