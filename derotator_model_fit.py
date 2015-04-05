@@ -21,37 +21,26 @@ if __name__ == '__main__':
     parser.add_argument("root", help="root name of the files to process")
     args = parser.parse_args()
 
+    params_names = ['der_x', 'der_y', 'int_x', 'int_y', 'beam_x', 'beam_y']
     params = OrderedDict()
-    params['der_x'] = 0.0
-    params['der_y'] = 0.0
-    params['int_x'] = 0.0
-    params['int_y'] = 0.0
-    params['beam_x'] = 0.0
-    params['beam_y'] = 0.0
+    for name in params_names:
+        params[name] = 0.0
     params['@sign'] = +1.0
 
-    der_x = []
-    der_y = []
-    int_x = []
-    int_y = []
-    beam_x = []
-    beam_y = []
+    result = Table()
+    result['filename'] = glob.glob(args.root+"_*.txt")
+    for name in params_names:
+        result[name] = np.zeros(len(result))
 
-    filenames = glob.glob(args.root+"_*.txt")
-
-    for filename in filenames:
+    for i, filename in enumerate(result['filename']):
         data = Table.read(filename, format="ascii.fixed_width_two_line")
 
         # Fit a derotator model
         params_fit = dpfit.leastsq(derotator.residuals, params, [data])
 
         # Save fit
-        der_x.append(params_fit['der_x'])
-        der_y.append(params_fit['der_y'])
-        int_x.append(params_fit['int_x'])
-        int_y.append(params_fit['int_y'])
-        beam_x.append(params_fit['beam_x'])
-        beam_y.append(params_fit['beam_y'])
+        for name in params_names:
+            result[name][i] = params_fit[name]
 
         # Plot results, if requested
         if args.plot:
@@ -60,28 +49,21 @@ if __name__ == '__main__':
             derotator.plot_model(axarr, params_fit)
             derotator.plot_data(axarr, data)
 
-    der_x = np.array(der_x)
-    der_y = np.array(der_y)
-    int_x = np.array(int_x)
-    int_y = np.array(int_y)
-    beam_x = np.array(beam_x)
-    beam_y = np.array(beam_y)
-
-    der_r = np.max(np.sqrt(der_x**2+der_y**2))
-    beam_r = np.max(np.sqrt(beam_x**2+beam_y**2))
-    int_r = np.max(np.sqrt(int_x**2+int_y**2))
+    der_r = np.max(np.sqrt(result['der_x']**2+result['der_y']**2))
+    beam_r = np.max(np.sqrt(result['beam_x']**2+result['beam_y']**2))
+    int_r = np.max(np.sqrt(result['int_x']**2+result['int_y']**2))
     max_r = np.max([der_r, int_r, beam_r])
 
     fig, axarr = plt.subplots(1,1)
-    axarr.plot(der_x, der_y, 'b', label="Derotator")
-    axarr.plot(beam_x, beam_y, 'g', label="Beam")
-    axarr.plot(int_x, int_y, 'r', label="Internal")
-    axarr.plot(der_x, der_y, 'b.')
-    axarr.plot(beam_x, beam_y, 'g.')
-    axarr.plot(int_x, int_y, 'r.')
-    axarr.arrow(der_x[-2], der_y[-2], der_x[-1]-der_x[-2], der_y[-1]-der_y[-2], color='b', length_includes_head=True, width=0.002)
-    axarr.arrow(beam_x[-2], beam_y[-2], beam_x[-1]-beam_x[-2], beam_y[-1]-beam_y[-2], color='g', length_includes_head=True, width=0.002)
-    axarr.arrow(int_x[-2], int_y[-2], int_x[-1]-int_x[-2], int_y[-1]-int_y[-2], color='r', length_includes_head=True, width=0.002)
+    axarr.plot(result['der_x'], result['der_y'], 'b', label="Derotator")
+    axarr.plot(result['beam_x'], result['beam_y'], 'g', label="Beam")
+    axarr.plot(result['int_x'], result['int_y'], 'r', label="Internal")
+    axarr.plot(result['der_x'], result['der_y'], 'b.')
+    axarr.plot(result['beam_x'], result['beam_y'], 'g.')
+    axarr.plot(result['int_x'], result['int_y'], 'r.')
+    axarr.arrow(result['der_x'][-2], result['der_y'][-2], result['der_x'][-1]-result['der_x'][-2], result['der_y'][-1]-result['der_y'][-2], color='b', length_includes_head=True, width=0.002)
+    axarr.arrow(result['beam_x'][-2], result['beam_y'][-2], result['beam_x'][-1]-result['beam_x'][-2], result['beam_y'][-1]-result['beam_y'][-2], color='g', length_includes_head=True, width=0.002)
+    axarr.arrow(result['int_x'][-2], result['int_y'][-2], result['int_x'][-1]-result['int_x'][-2], result['int_y'][-1]-result['int_y'][-2], color='r', length_includes_head=True, width=0.002)
     axarr.set_aspect('equal', adjustable='box')
     axarr.set_xlim(-max_r, +max_r)
     axarr.set_ylim(-max_r, +max_r)
