@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+from argparse import ArgumentParser
 from collections import OrderedDict
 from astropy.table import Table
 import numpy as np
@@ -7,54 +10,61 @@ import derotator
 import glob
 
 
-pattern = "./data_*.txt"
-# pattern = "./data_0.txt"
+if __name__ == '__main__':
+    description = \
+        """
+        """
+    parser = ArgumentParser(description=description)
+    parser.add_argument("-p", "--plot",
+                        action="store_true", dest="plot", default=False,
+                        help="plot model fitting diagnostics")
+    parser.add_argument("root", help="root name of the files to process")
+    args = parser.parse_args()
 
-der_x = []
-der_y = []
-int_x = []
-int_y = []
-beam_x = []
-beam_y = []
+    der_x = []
+    der_y = []
+    int_x = []
+    int_y = []
+    beam_x = []
+    beam_y = []
 
-filenames = glob.glob(pattern)
+    filenames = glob.glob(args.root+"_*.txt")
 
-for filename in filenames:
-    data = Table.read(filename, format="ascii.fixed_width_two_line")
+    for filename in filenames:
+        data = Table.read(filename, format="ascii.fixed_width_two_line")
 
-    # Fit a derotator model
-    params = OrderedDict()
-    params['der_x'] = 0.0
-    params['der_y'] = 0.0
-    params['int_x'] = 0.0
-    params['int_y'] = 0.0
-    params['beam_x'] = 0.0
-    params['beam_y'] = 0.0
-    params['@sign'] = +1.0
-    params_fit = dpfit.leastsq(derotator.residuals, params, [data])
+        # Fit a derotator model
+        params = OrderedDict()
+        params['der_x'] = 0.0
+        params['der_y'] = 0.0
+        params['int_x'] = 0.0
+        params['int_y'] = 0.0
+        params['beam_x'] = 0.0
+        params['beam_y'] = 0.0
+        params['@sign'] = +1.0
+        params_fit = dpfit.leastsq(derotator.residuals, params, [data])
 
-    # Save fit
-    der_x.append(params_fit['der_x'])
-    der_y.append(params_fit['der_y'])
-    int_x.append(params_fit['int_x'])
-    int_y.append(params_fit['int_y'])
-    beam_x.append(params_fit['beam_x'])
-    beam_y.append(params_fit['beam_y'])
+        # Save fit
+        der_x.append(params_fit['der_x'])
+        der_y.append(params_fit['der_y'])
+        int_x.append(params_fit['int_x'])
+        int_y.append(params_fit['int_y'])
+        beam_x.append(params_fit['beam_x'])
+        beam_y.append(params_fit['beam_y'])
 
-    # Plot results
-    fig, axarr = plt.subplots(2,1,figsize=(6,12))
-    derotator.plot_errors(axarr, data, params_fit)
-    derotator.plot_model(axarr, params_fit)
-    derotator.plot_data(axarr, data)
+        # Plot results, if requested
+        if args.plot:
+            fig, axarr = plt.subplots(2,1,figsize=(6,12))
+            derotator.plot_errors(axarr, data, params_fit)
+            derotator.plot_model(axarr, params_fit)
+            derotator.plot_data(axarr, data)
 
-der_x = np.array(der_x)
-der_y = np.array(der_y)
-int_x = np.array(int_x)
-int_y = np.array(int_y)
-beam_x = np.array(beam_x)
-beam_y = np.array(beam_y)
-
-if len(filenames) > 1:
+    der_x = np.array(der_x)
+    der_y = np.array(der_y)
+    int_x = np.array(int_x)
+    int_y = np.array(int_y)
+    beam_x = np.array(beam_x)
+    beam_y = np.array(beam_y)
 
     der_r = np.max(np.sqrt(der_x**2+der_y**2))
     beam_r = np.max(np.sqrt(beam_x**2+beam_y**2))
@@ -77,4 +87,4 @@ if len(filenames) > 1:
     axarr.grid()
     axarr.legend()
 
-plt.show()
+    plt.show()
