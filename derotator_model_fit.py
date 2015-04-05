@@ -21,6 +21,15 @@ if __name__ == '__main__':
     parser.add_argument("root", help="root name of the files to process")
     args = parser.parse_args()
 
+    params = OrderedDict()
+    params['der_x'] = 0.0
+    params['der_y'] = 0.0
+    params['int_x'] = 0.0
+    params['int_y'] = 0.0
+    params['beam_x'] = 0.0
+    params['beam_y'] = 0.0
+    params['@sign'] = +1.0
+
     der_x = []
     der_y = []
     int_x = []
@@ -34,14 +43,6 @@ if __name__ == '__main__':
         data = Table.read(filename, format="ascii.fixed_width_two_line")
 
         # Fit a derotator model
-        params = OrderedDict()
-        params['der_x'] = 0.0
-        params['der_y'] = 0.0
-        params['int_x'] = 0.0
-        params['int_y'] = 0.0
-        params['beam_x'] = 0.0
-        params['beam_y'] = 0.0
-        params['@sign'] = +1.0
         params_fit = dpfit.leastsq(derotator.residuals, params, [data])
 
         # Save fit
