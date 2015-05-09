@@ -18,6 +18,9 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--plot",
                         action="store_true", dest="plot", default=False,
                         help="plot model fitting diagnostics")
+    parser.add_argument("-r", "--reverse",
+                        action="store_true", dest="reverse", default=False,
+                        help="reverse rotation angle")
     parser.add_argument("root", help="root name of the files to process")
     args = parser.parse_args()
 
@@ -25,7 +28,7 @@ if __name__ == '__main__':
     params = OrderedDict()
     for name in params_names:
         params[name] = 0.0
-    params['@sign'] = +1.0
+    params['@sign'] = +1.0 if not args.reverse else -1.0
 
     result = Table()
     result['filename'] = glob.glob(args.root+"_*.txt")
