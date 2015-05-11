@@ -21,6 +21,9 @@ if __name__ == '__main__':
     parser.add_argument("-r", "--reverse",
                         action="store_true", dest="reverse", default=False,
                         help="reverse rotation angle")
+    parser.add_argument("-s", "--save",
+                        action="store_true", dest="save", default=False,
+                        help="save figures")
     parser.add_argument("root", help="root name of the files to process")
     args = parser.parse_args()
 
@@ -51,6 +54,8 @@ if __name__ == '__main__':
             derotator.plot_errors(axarr, data, params_fit)
             derotator.plot_model(axarr, params_fit)
             derotator.plot_data(axarr, data)
+            if args.save:
+                fig.savefig(filename.replace('.txt','.png'))
 
     der_r = np.max(np.sqrt(result['der_x']**2+result['der_y']**2))
     beam_r = np.max(np.sqrt(result['beam_x']**2+result['beam_y']**2))
