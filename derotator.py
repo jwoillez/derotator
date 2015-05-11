@@ -1,5 +1,6 @@
 import numpy as np
 from astropy.table import Table
+from matplotlib.legend_handler import HandlerLine2D
 
 
 def model(params, data):
