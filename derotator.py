@@ -35,7 +35,7 @@ def plot_model(axarr, params):
 
     # Plot model with diagnostics
     axarr[0].plot(x, y, 'k')
-    axarr[0].plot([0.0, params['der_x']], [0.0, params['der_y']], label="Derotator", lw=1.5, color='b')
+    axarr[0].plot(params['der_x'], params['der_y'], 'o', label="Derotator", lw=1.5, color='b')
     axarr[0].plot([params['der_x'], params['der_x']+params['beam_x']], [params['der_y'], params['der_y']+params['beam_y']], label="Beam", lw=1.5, color='g')
     axarr[0].plot([params['der_x']+params['beam_x'], params['der_x']+params['int_x']+params['beam_x']], [params['der_y']+params['beam_y'], params['der_y']+params['int_y']+params['beam_y']], label="Internal", lw=1.5, color='r')
     axarr[0].set_aspect('equal', adjustable='box')
