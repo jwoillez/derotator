@@ -34,7 +34,6 @@ def plot_model(axarr, params):
     x, y = model(params, data)
 
     # Plot model with diagnostics
-    axarr[0].plot(0.0, 0.0, '+k')
     axarr[0].plot(x, y, 'k')
     axarr[0].plot([0.0, params['der_x']], [0.0, params['der_y']], label="Derotator", lw=1.5, color='b')
     axarr[0].plot([params['der_x'], params['der_x']+params['beam_x']], [params['der_y'], params['der_y']+params['beam_y']], label="Beam", lw=1.5, color='g')
