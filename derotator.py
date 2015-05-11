@@ -24,10 +24,9 @@ def residuals(params, data):
 def plot_model(axarr, params):
 
     # Compute plot extent, based on worst case scenario
-    r1 = np.sqrt(params['der_x']**2+params['der_y']**2)
-    r1 += np.sqrt(params['int_x']**2+params['int_y']**2)
-    r1 += np.sqrt(params['beam_x']**2+params['beam_y']**2)
-    r0 = r1*1.2
+    r_beam = np.sqrt(params['beam_x']**2+params['beam_y']**2)
+    r_int = np.sqrt(params['int_x']**2+params['int_y']**2)
+    r_max = 1.2*max([r_beam, r_int])
 
     # Compute model
     data = Table()
@@ -48,8 +47,8 @@ def plot_model(axarr, params):
     axarr[1].plot([0.0, params['beam_x']], [0.0, params['beam_y']], label="Beam", lw=1.5, color='g')
     axarr[1].plot([0.0, params['int_x']], [0.0, params['int_y']], label="Internal", lw=1.5, color='r')
     axarr[1].set_aspect('equal', adjustable='box')
-    axarr[1].set_xlim(-r1,+r1)
-    axarr[1].set_ylim(-r1,+r1)
+    axarr[1].set_xlim(-r_max,+r_max)
+    axarr[1].set_ylim(-r_max,+r_max)
     axarr[1].grid()
     axarr[1].legend()
 
