@@ -7,6 +7,7 @@ import numpy as np
 import pylab as plt
 from astropy.io import fits
 from astropy.table import Table
+from PIL import Image
 
 
 def generate_coordinates(image):
@@ -33,8 +34,10 @@ def threshold_image(image):
 
 
 def measure_centroid(filename, ax=None):
-    with fits.open(filename) as hdulist:
-        image = hdulist[0].data
+    if filename.rsplit('.')[-1].lower() == 'fits':
+        image = fits.open(filename)[0].data
+    else:
+        image = np.array(Image.open(filename).convert("F"))
     coord = generate_coordinates(image)
     center = find_maximum(image, coord)
     subimage, subcoord = extract_subimage(image, coord, center, [40,40])
@@ -49,9 +52,9 @@ def measure_centroid(filename, ax=None):
 
 
 def measure_derotator(input_root, plot=True):
-    # Identify the files to process, extract te rotator angle, store in a table
-    filenames = [filename for filename in glob.glob(input_root+"_*.fits") if re.match(input_root+"_[0-9]+.fits", filename)]
-    angles = [float(re.search("_([0-9]+).fits", filename).group(1)) for filename in filenames]
+    # Identify the files to process, extract the rotator angle, store in a table
+    filenames = [filename for filename in glob.glob(input_root+"_*.*") if re.match(input_root+"_[0-9]+\..*", filename)]
+    angles = [float(re.search("_([0-9]+)\..*", filename).group(1)) for filename in filenames]
     table = Table()
     table['angle'] = angles
     table['x'] = np.zeros(len(angles), dtype=np.float)
@@ -62,7 +65,7 @@ def measure_derotator(input_root, plot=True):
     if plot:
         fig, axarr = plt.subplots(1,len(filenames), figsize=(2*len(filenames),3))
         fig.suptitle(input_root)
-    # Measure centroids of identified fits files
+    # Measure centroids of identified files
     for i in range(len(table)):
         barycenter = measure_centroid(table['filename'][i], ax=(axarr[i] if plot else None))
         if plot:
