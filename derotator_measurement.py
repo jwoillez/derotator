@@ -57,8 +57,8 @@ def measure_derotator(input_root, plot=True):
     angles = [float(re.search("_([0-9]+)\..*", filename).group(1)) for filename in filenames]
     table = Table()
     table['angle'] = angles
-    table['x'] = np.zeros(len(angles), dtype=np.float)
-    table['y'] = np.zeros(len(angles), dtype=np.float)
+    table['x'] = np.zeros(len(angles), dtype=float)
+    table['y'] = np.zeros(len(angles), dtype=float)
     table['filename'] = filenames
     table.sort('angle')
     # Prepare plot if needed
